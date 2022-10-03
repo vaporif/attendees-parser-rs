@@ -129,5 +129,3 @@ pub struct Group {
     #[serde(rename = "is_speed_networking_group")]
     pub is_speed_networking_group: i64,
 }
-
-                

@@ -57,7 +57,7 @@ pub fn generate_csv(file_path: &str, attendees: Attendees) -> Result<(), Box<dyn
             location: attendee.location,
             job_title: attendee.job_title,
             name: attendee.name,
-            picture_url: attendee.picture_url
+            picture_url: attendee.picture_url,
         })?;
     }
     wtr.flush()?;
