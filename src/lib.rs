@@ -28,6 +28,7 @@ struct Record {
 pub fn get_parsed_attendees(file_path: &str) -> Result<Attendees, Box<dyn Error>> {
     let file = fs::File::open(file_path)?;
 
+    // note: i know it's inefficient and simple fs::read_lines would be better
     let attendees: Attendees = io::BufReader::new(file)
         .lines()
         .into_iter()
