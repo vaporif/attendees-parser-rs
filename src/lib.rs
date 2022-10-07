@@ -1,9 +1,8 @@
 use std::{
     fs::{self},
-    io::{self, BufRead},
 };
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 
 use csv::Writer;
 use generated_json_models::*;
@@ -33,20 +32,15 @@ pub fn run() -> Result<()> {
 }
 
 fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
-    let file = fs::File::open(file_path).with_context(|| "Failed to read json file")?;
-
-    // note: i know it's inefficient and simple fs::read_lines would be better
-    let attendees: Attendees = io::BufReader::new(file)
+    let attendees: Attendees = fs::read_to_string(file_path)
+        .with_context(|| "Failed to read json file")?
         .lines()
         .into_iter()
         .filter_map(|x| {
-            x.with_context(|| "read line error").ok().and_then(|res| {
-                serde_json::from_str::<Root>(&res)
-                    .with_context(|| "parse error")
-                    .ok()
-                    .filter(|f| f.success && !f.data.is_empty())
-                    .map(|f| f.data)
-            })
+            serde_json::from_str::<Root>(&x)
+                .ok()
+                .filter(|f| f.success && !f.data.is_empty())
+                .map(|f| f.data)
         })
         .flatten()
         .collect();
@@ -57,7 +51,6 @@ fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
 fn generate_csv(file_path: &str, attendees: Attendees) -> Result<()> {
     let mut wtr = Writer::from_path(file_path)?;
 
-    
     for attendee in attendees.into_iter() {
         wtr.serialize(Record {
             attendee_type: attendee.type_key_translation,
