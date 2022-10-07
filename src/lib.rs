@@ -1,5 +1,4 @@
 use std::{
-    error::Error,
     fs::{self},
     io::{self, BufRead},
 };
@@ -8,7 +7,13 @@ use csv::Writer;
 use generated_json_models::*;
 use serde_derive::Serialize;
 
+pub mod errors;
 pub mod generated_json_models;
+
+use errors::*;
+
+#[macro_use]
+extern crate error_chain;
 
 type Attendee = Daum;
 type Attendees = Vec<Attendee>;
@@ -25,8 +30,8 @@ struct Record {
     picture_url: Option<String>,
 }
 
-pub fn get_parsed_attendees(file_path: &str) -> Result<Attendees, Box<dyn Error>> {
-    let file = fs::File::open(file_path)?;
+pub fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
+    let file = fs::File::open(file_path).chain_err(|| "unable to open file")?;
 
     // note: i know it's inefficient and simple fs::read_lines would be better
     let attendees: Attendees = io::BufReader::new(file)
@@ -46,8 +51,8 @@ pub fn get_parsed_attendees(file_path: &str) -> Result<Attendees, Box<dyn Error>
     Ok(attendees)
 }
 
-pub fn generate_csv(file_path: &str, attendees: Attendees) -> Result<(), Box<dyn Error>> {
-    let mut wtr = Writer::from_path(file_path)?;
+pub fn generate_csv(file_path: &str, attendees: Attendees) -> Result<()> {
+    let mut wtr = Writer::from_path(file_path).chain_err(|| "unable to open csv file")?;
 
     for attendee in attendees.into_iter() {
         wtr.serialize(Record {
@@ -59,9 +64,10 @@ pub fn generate_csv(file_path: &str, attendees: Attendees) -> Result<(), Box<dyn
             job_title: attendee.job_title,
             name: attendee.name,
             picture_url: attendee.picture_url,
-        })?;
+        })
+        .chain_err(|| "unable to write csv row")?;
     }
-    wtr.flush()?;
+    wtr.flush().chain_err(|| "unable to save csv file")?;
 
     Ok(())
 }

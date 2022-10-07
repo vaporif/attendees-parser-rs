@@ -1,14 +1,20 @@
-use std::error::Error;
-
 use attendees_parser_rs::*;
 
+use errors::*;
+
 fn main() {
-    if let Err(err) = run() {
-        eprintln!("error: {}", err);
+    if let Err(ref e) = run() {
+        use error_chain::ChainedError;
+        use std::io::Write; // trait which holds `display_chain`
+        let stderr = &mut ::std::io::stderr();
+        let errmsg = "Error writing to stderr";
+
+        writeln!(stderr, "{}", e.display_chain()).expect(errmsg);
+        ::std::process::exit(1);
     }
 }
 
-fn run() -> Result<(), Box<dyn Error>> {
+fn run() -> Result<()> {
     let attendees = get_parsed_attendees("attendees.json")?;
     generate_csv("attendees.csv", attendees)?;
     Ok(())
