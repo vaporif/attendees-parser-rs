@@ -38,8 +38,9 @@ pub fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
         .lines()
         .into_iter()
         .filter_map(|x| {
-            x.ok().and_then(|res| {
+            x.chain_err(|| "line read failure").ok().and_then(|res| {
                 serde_json::from_str::<Root>(&res)
+                    .chain_err(|| "parse failure")
                     .ok()
                     .filter(|f| f.success && !f.data.is_empty())
                     .map(|f| f.data)
