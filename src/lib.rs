@@ -30,7 +30,13 @@ struct Record {
     picture_url: Option<String>,
 }
 
-pub fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
+pub fn run() -> Result<()> {
+    let attendees = get_parsed_attendees("attendees.json")?;
+    generate_csv("attendees.csv", attendees)?;
+    Ok(())
+}
+
+fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
     let file = fs::File::open(file_path).chain_err(|| "unable to open file")?;
 
     // note: i know it's inefficient and simple fs::read_lines would be better
@@ -52,7 +58,7 @@ pub fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
     Ok(attendees)
 }
 
-pub fn generate_csv(file_path: &str, attendees: Attendees) -> Result<()> {
+fn generate_csv(file_path: &str, attendees: Attendees) -> Result<()> {
     let mut wtr = Writer::from_path(file_path).chain_err(|| "unable to open csv file")?;
 
     for attendee in attendees.into_iter() {

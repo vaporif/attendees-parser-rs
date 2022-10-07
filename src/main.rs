@@ -1,7 +1,5 @@
 use attendees_parser_rs::*;
 
-use errors::*;
-
 fn main() {
     if let Err(ref e) = run() {
         use error_chain::ChainedError;
@@ -12,10 +10,4 @@ fn main() {
         writeln!(stderr, "{}", e.display_chain()).expect(errmsg);
         ::std::process::exit(1);
     }
-}
-
-fn run() -> Result<()> {
-    let attendees = get_parsed_attendees("attendees.json")?;
-    generate_csv("attendees.csv", attendees)?;
-    Ok(())
 }
