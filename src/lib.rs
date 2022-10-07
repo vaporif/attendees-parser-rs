@@ -28,20 +28,21 @@ struct Record {
 
 pub fn run() -> Result<()> {
     let attendees = get_parsed_attendees("attendees.json")?;
-    generate_csv("attendees.csv", attendees).with_context(|| format!("Failed to generate csv file"))?;
+    generate_csv("attendees.csv", attendees).with_context(|| "Failed to generate csv file")?;
     Ok(())
 }
 
 fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
-    let file = fs::File::open(file_path).with_context(|| format!("Failed to read json file"))?;
+    let file = fs::File::open(file_path).with_context(|| "Failed to read json file")?;
 
     // note: i know it's inefficient and simple fs::read_lines would be better
     let attendees: Attendees = io::BufReader::new(file)
         .lines()
         .into_iter()
         .filter_map(|x| {
-            x.ok().and_then(|res| {
+            x.with_context(|| "read line error").ok().and_then(|res| {
                 serde_json::from_str::<Root>(&res)
+                    .with_context(|| "parse error")
                     .ok()
                     .filter(|f| f.success && !f.data.is_empty())
                     .map(|f| f.data)

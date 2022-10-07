@@ -1,8 +1,8 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use attendees_parser_rs::*;
 
 fn main() -> Result<()> {
-    run().with_context(|| format!("Program failed"))?;
+    run()?;
 
     Ok(())
 }
