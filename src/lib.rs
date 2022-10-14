@@ -1,7 +1,3 @@
-use std::{
-    fs::{self},
-};
-
 use anyhow::{Context, Result};
 
 use csv::Writer;
@@ -32,7 +28,7 @@ pub fn run() -> Result<()> {
 }
 
 fn get_parsed_attendees(file_path: &str) -> Result<Attendees> {
-    let attendees: Attendees = fs::read_to_string(file_path)
+    let attendees: Attendees = std::fs::read_to_string(file_path)
         .with_context(|| "Failed to read json file")?
         .lines()
         .into_iter()
