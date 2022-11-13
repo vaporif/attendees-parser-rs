@@ -4,7 +4,7 @@ use csv::Writer;
 use generated_json_models::*;
 use serde_derive::Serialize;
 
-pub mod generated_json_models;
+mod generated_json_models;
 
 type Attendee = Daum;
 type Attendees = Vec<Attendee>;
@@ -63,3 +63,4 @@ fn generate_csv(file_path: &str, attendees: Attendees) -> Result<()> {
 
     Ok(())
 }
+
